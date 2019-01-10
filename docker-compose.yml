@@ -1,4 +1,3 @@
-# docker-compose up --scale app=5
 version: '3.7'
 services:
 #  agent-1:
@@ -11,10 +10,11 @@ services:
 #  agent-3:
 #    ports:
 #     - "83:5000"
-  app:
+  blockchian_server:
     build: .
+    image: blockchain
     ports:
-      - 10000-10003:80
+      - 10000-10003:5000
 
 #     abc:
        #    image: myimage
