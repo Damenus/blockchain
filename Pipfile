@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+"ruamel.yaml" = "==0.15.37"
+logging-tree = "==1.7"
+colorlog = "==3.1.4"
+dataclasses = "==0.6"
+requests = "==2.20.1"
+confluent-kafka = "==0.11.4"
+
+[dev-packages]
+pytest = "==3.9.1"
+pytest-cov = "==2.6.0"
+flake8 = "==3.6.0"
+tox = "==3.5.2"
+pex = "==1.5.1"
+setuptools_scm = "==3.0.6"
+
+[requires]
+python_version = "3.6"
