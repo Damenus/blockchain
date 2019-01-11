@@ -14,11 +14,9 @@ setup(
     ],
     install_requires=[
           'requests==2.20.1',
-          'ruamel.yaml==0.15.37',
           'colorlog==3.1.4',
           'logging-tree==1.7',
-          'dataclasses==0.6',
-          'confluent-kafka==0.11.4'
+          'flask==1.0.2',
     ],
     tests_require=[
           'pytest',
@@ -27,8 +25,4 @@ setup(
     ],
     packages=find_packages(),
     python_requires=">=3.6",
-    use_scm_version=True,
-    setup_requires=[
-        'setuptools_scm'
-    ],
 )

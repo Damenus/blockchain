@@ -1,7 +1,9 @@
 FROM python:3.6-alpine
 
-ADD /dist/blockchain.pex /usr/bin/
+COPY . /app
+WORKDIR /app
+RUN pip install -e .
 
 EXPOSE 5000
 
-CMD ["blockchain.pex"]
+CMD ["python", "main.py"]
