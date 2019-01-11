@@ -5,4 +5,10 @@ services:
     image: blockchain
 #    command: abc
     ports:
-      - 10000-10003:5000
+      - 10000-10003:5000 # (172.20.0.1:10000)
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: "bridge"

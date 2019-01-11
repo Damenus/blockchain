@@ -6,4 +6,4 @@ RUN pip install -e .
 
 EXPOSE 5000
 
-CMD ["python", "main.py"]
+CMD ["python", "blockchain.py"]
