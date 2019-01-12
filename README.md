@@ -10,7 +10,7 @@ The program is prepared to deploy with docker composer.
 Run command:
 
 ````
-docker-compose up --scale blockchian_server=3
+docker-compose up --scale blockchian_server=3 --force-recreate --build
 ````
 
 ### Requariments
@@ -24,6 +24,7 @@ docker-compose > 1.23.2,
 
 ````
 docker-compose build --no-cache
+docker rmi $(docker images -f "dangling=true" -q); docker-compose build
 ````
 
 

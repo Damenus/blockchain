@@ -261,7 +261,15 @@ def full_chain():
         'chain': blockchain.chain,
         'length': len(blockchain.chain),
     }
-    #return jsonify(response), 200
+    return jsonify(response), 200
+
+
+@app.route('/chain/template', methods=['GET'])
+def full_chain_template():
+    response = {
+        'chain': blockchain.chain,
+        'length': len(blockchain.chain),
+    }
     return render_template('chain.html', node_identifier=node_identifier, chain=response), 200
 
 
@@ -304,12 +312,15 @@ def consensus():
 
 if __name__ == '__main__':
     print(node_ip)
-    response = requests.post(
-        f'http://ip_register_server:5000/node/register',
-        '{"node": "%s", "identifier": "%s","public_key": "%s"}' % (node_ip, node_identifier, public_key),
-        '{"node": "%s", "identifier": "%s","public_key": "%s"}' % (node_ip, node_identifier, public_key)
-    )
-    nodes = response.get_json().get('total_nodes')
+    url = "http://ip_register_server:5000/node/register"
+    data = '{"node": "%s", "identifier": "%s","public_key": "%s"}' % (node_ip, node_identifier, "dd")
+    headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+    response = requests.post(url, data=data, json=data, headers=headers)
+
+    if response.status_code == 200:
+        messege = response.json()['message']
+        nodes = response.json()['total_nodes']
+
     for node in nodes:
         blockchain.register_node(node['node'])
 

@@ -37,7 +37,7 @@ def register_nodes():
         'message': 'New nodes have been added',
         'total_nodes': list_nodes,
     }
-    return jsonify(response), 201
+    return jsonify(response), 200
 
 
 if __name__ == '__main__':
