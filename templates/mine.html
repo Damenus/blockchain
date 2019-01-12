@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %} Index {% endblock %}
+{% block head %}
+ {{ super() }}
+{% endblock %}
+
+{% block body %}
+    {{ super() }}
+
+    {{ mine['message'] }}
+    <p>Index: {{ mine['index'] }}
+    <p>Proof: {{ mine['proof'] }} </p>
+    <p>Previous_hash: {{ mine['previous_hash'] }} </p>
+    <p>Transactions: </p>
+    <ul>
+        {% for transaction in mine['transactions'] %}
+        Transaction {{  loop.length - loop.index }}
+        <ul>
+            <li>Sender: {{ transaction['sender'] }}</li>
+            <li>Recipient: {{ transaction['recipient'] }}</li>
+            <li>Amount: {{ transaction['amount'] }}</li>
+        </ul>
+        {% endfor %}
+    </ul>
+
+
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %} Index {% endblock %}
+{% block head %}
+ {{ super() }}
+{% endblock %}
+
+{% block body %}
+    {{ super() }}
+
+    {% for block in chain['chain'] %}
+    <ul>
+        <p>Index: {{ block['index'] }}
+        <p>Proof: {{ block['proof'] }} </p>
+        <p>Previous_hash: {{ block['previous_hash'] }} </p>
+        <p>Timestamp: {{ block['timestamp'] }} </p>
+        <p>Transactions: </p>
+        <ul>
+            {% for transaction in block['transactions'] %}
+            Transaction {{ loop.length - loop.index }}
+            <ul>
+                <li>Sender: {{ transaction['sender'] }}</li>
+                <li>Recipient: {{ transaction['recipient'] }}</li>
+                <li>Amount: {{ transaction['amount'] }}</li>
+            </ul>
+            {% endfor %}
+        </ul>
+    </ul>
+    {% endfor %}
+
+{% endblock %}

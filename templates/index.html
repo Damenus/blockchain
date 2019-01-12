@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %} Index {% endblock %}
+{% block head %}
+ {{ super() }}
+{% endblock %}
+
+{% block body %}
+    {{ super() }}
+
+    <form action = "/transactions/new" method = "POST">
+         <p>Sender:  <input type = "text" name = "sender" value="{{ node_identifier }}" /></p>
+         <p>Recipient <input type = "text" name = "recipient" /></p>
+         <p>Amount <input type = "text" name = "amount" /></p>
+         <p><input type = "submit" value = "Submit" /></p>
+    </form>
+
+
+{% if response is defined %}
+    {{ response['message'] }}
+{% endif %}
+
+{% endblock %}

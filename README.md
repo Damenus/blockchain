@@ -1,14 +1,7 @@
 ## Blockchain simple implementation
 
 The program is based on a [document][1] write by Satoshi Nakamoto 
-and [tutorial Hackernoon][2].
-
-
-### Build
-
-````
-docker-compose build
-````
+and [tutorial Hackernoon][2]. 
 
 ### Run
 
@@ -18,6 +11,19 @@ Run command:
 
 ````
 docker-compose up --scale blockchian_server=3
+````
+
+### Requariments
+
+````
+Docker > 18.06.1-ce
+docker-compose > 1.23.2,
+````
+
+### Build
+
+````
+docker-compose build --no-cache
 ````
 
 
