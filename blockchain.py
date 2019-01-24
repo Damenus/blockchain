@@ -190,8 +190,6 @@ class Blockchain:
         """
 
         money = 0
-
-        first_block = self.chain[-1]
         current_index = 0
 
         while current_index < len(self.chain):
@@ -203,6 +201,10 @@ class Blockchain:
                     money -= int(transaction['amount'])
 
             current_index += 1
+
+        for transaction in self.current_transactions:
+            if transaction['sender'] == node_identifier:
+                money -= int(transaction['amount'])
 
         return money
 
