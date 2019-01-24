@@ -1,10 +1,10 @@
 import hashlib
 import json
 from textwrap import dedent
-from time import time
+from time import time, sleep
 from uuid import uuid4
 import requests
-import subprocess
+from subprocess import check_output
 from cryptography.hazmat.primitives import serialization as crypto_serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend as crypto_default_backend
@@ -21,6 +21,11 @@ class Blockchain:
         self.nodes = set()
 
         # Create the genesis block
+        self.current_transactions.append({
+            'sender': 0,
+            'recipient': node_identifier,
+            'amount': 100,
+        })
         self.new_block(previous_hash=1, proof=100)
 
     def new_block(self, proof, previous_hash=None):
@@ -159,7 +164,8 @@ class Blockchain:
 
         # Grab and verify the chains from all the nodes in our network
         for node in neighbours:
-            response = requests.get(f'http://{node}/chain')
+            url = 'http://%s:5000/chain' % node
+            response = requests.get(url)
 
             if response.status_code == 200:
                 length = response.json()['length']
@@ -177,6 +183,29 @@ class Blockchain:
 
         return False
 
+    def get_my_amount(self):
+        """
+        Sum node currency
+        :return: <int> Actual state of account
+        """
+
+        money = 0
+
+        first_block = self.chain[-1]
+        current_index = 0
+
+        while current_index < len(self.chain):
+            block = self.chain[current_index]
+            for transaction in block['transactions']:
+                if transaction['recipient'] == node_identifier:
+                    money += int(transaction['amount'])
+                if transaction['sender'] == node_identifier:
+                    money -= int(transaction['amount'])
+
+            current_index += 1
+
+        return money
+
 
 # Instantiate our Node
 app = Flask(__name__, template_folder='./templates')
@@ -184,7 +213,7 @@ app = Flask(__name__, template_folder='./templates')
 # Generate a globally unique address for this node
 node_identifier = str(uuid4()).replace('-', '')
 
-node_ip = subprocess.check_output(['awk', 'END{print $1}', '/etc/hosts'])
+node_ip = check_output(['awk', 'END{print $1}', '/etc/hosts']).decode('utf-8').replace('\n','')
 
 key = rsa.generate_private_key(
     backend=crypto_default_backend(),
@@ -205,7 +234,7 @@ blockchain = Blockchain()
 
 @app.route('/')
 def index():
-    return render_template('index.html', node_identifier=node_identifier), 200
+    return render_template('index.html', node_identifier=node_identifier, node_money=blockchain.get_my_amount()), 200
 
 @app.route('/mine', methods=['GET'])
 def mine():
@@ -219,7 +248,7 @@ def mine():
     blockchain.new_transaction(
         sender="0",
         recipient=node_identifier,
-        amount=1,
+        amount=10,
     )
 
     # Forge the new Block by adding it to the chain
@@ -234,7 +263,20 @@ def mine():
         'previous_hash': block['previous_hash'],
     }
     # return jsonify(response), 200
-    return render_template('mine.html', node_identifier=node_identifier, mine=response), 200
+    return render_template('mine.html', node_identifier=node_identifier, node_money=blockchain.get_my_amount(), mine=response), 200
+
+
+@app.route('/transactions/receive_new', methods=['POST'])
+def new_transaction_form_node():
+    values = request.get_json()
+
+    index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
+
+    sender = values.get('sender')
+    recipient = values.get('recipient')
+    amount = values.get('amount')
+
+    index = blockchain.new_transaction(sender, recipient, amount)
 
 
 @app.route('/transactions/new', methods=['POST'])
@@ -250,9 +292,16 @@ def new_transaction():
     # Create a new Transaction
     index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
 
+    # Distribute the new Transaction in network
+    for node in blockchain.nodes:
+        url = "http://%s:5000/transactions/receive_new" % node
+        headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+        data = '{"sender": "%s", "recipient": "%s","amount": "%s"}' % (values['sender'], values['recipient'], values['amount'])
+        requests.post(url, data=data, json=data, headers=headers)
+
     response = {'message': f'Transaction will be added to Block {index}'}
     #return jsonify(response), 201
-    return render_template('index.html', node_identifier=node_identifier, response=response), 201
+    return render_template('index.html', node_identifier=node_identifier, node_money=blockchain.get_my_amount(), response=response), 201
 
 
 @app.route('/chain', methods=['GET'])
@@ -270,7 +319,7 @@ def full_chain_template():
         'chain': blockchain.chain,
         'length': len(blockchain.chain),
     }
-    return render_template('chain.html', node_identifier=node_identifier, chain=response), 200
+    return render_template('chain.html', node_identifier=node_identifier, node_money=blockchain.get_my_amount(), chain=response), 200
 
 
 @app.route('/nodes/register', methods=['POST'])
@@ -282,11 +331,38 @@ def register_nodes():
         return "Error: Please supply a valid list of nodes", 400
 
     for node in nodes:
+        #blockchain.nodes.add(node['node'])
         blockchain.register_node(node)
 
     response = {
         'message': 'New nodes have been added',
         'total_nodes': list(blockchain.nodes),
+    }
+    return jsonify(response), 201
+
+
+@app.route('/node/register', methods=['POST'])
+def register_node():
+    values = request.get_json()
+
+    node_ip = values.get('node')
+    if nodes is None:
+        return "Error: Please supply a valid list of nodes", 400
+
+    blockchain.nodes.add(node_ip)
+
+    response = {
+        'message': 'New nodes have been added'
+    }
+
+    return jsonify(response), 200
+
+
+@app.route('/nodes', methods=['GET'])
+def list_all_nodes():
+    list_nodes = list(blockchain.nodes)
+    response = {
+        'total_nodes': list_nodes,
     }
     return jsonify(response), 201
 
@@ -307,21 +383,28 @@ def consensus():
         }
 
     #return jsonify(response), 200
-    return render_template('index.html', node_identifier=node_identifier, response=response), 200
+    return render_template('index.html', node_identifier=node_identifier, node_money=blockchain.get_my_amount(), response=response), 200
 
+app.jinja_env.filters['hash'] = blockchain.hash
 
 if __name__ == '__main__':
     print(node_ip)
     url = "http://ip_register_server:5000/node/register"
     data = '{"node": "%s", "identifier": "%s","public_key": "%s"}' % (node_ip, node_identifier, "dd")
     headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
-    response = requests.post(url, data=data, json=data, headers=headers)
+    nodes = []
+
+    try:
+        response = requests.post(url, data=data, json=data, headers=headers)
+    except Exception:
+        sleep(10)
+        response = requests.post(url, data=data, json=data, headers=headers)
 
     if response.status_code == 200:
         messege = response.json()['message']
         nodes = response.json()['total_nodes']
 
     for node in nodes:
-        blockchain.register_node(node['node'])
+        blockchain.nodes.add(node['node'])
 
     app.run(host='0.0.0.0', port=5000)

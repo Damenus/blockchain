@@ -12,7 +12,7 @@ services:
     image: blockchain
     command: python blockchain.py
     ports:
-      - 10001-10004:5000 # (172.20.0.1:10000)
+      - 10001-10003:5000 # (172.20.0.1:10000)
     networks:
       - backend
 

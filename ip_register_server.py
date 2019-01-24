@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+import requests
 
 # Instantiate our Node
 app = Flask(__name__, template_folder='./templates')
@@ -21,17 +22,24 @@ def list_all_nodes():
 def register_nodes():
     values = request.get_json()
 
-    node = values.get('node')
-    identifier = values.get('identifier')
+    ip_node = values.get('node')
+    identifier_node = values.get('identifier')
     public_key = values.get('public_key')
 
     list_nodes = list(nodes)
-
-    nodes.append({
-        'node': node,
-        'identifier': identifier,
+    new_node = {
+        'node': ip_node,
+        'identifier': identifier_node,
         'public_key': public_key
-    })
+    }
+
+    for node in list_nodes:
+        url = "http://%s:5000/node/register" % node['node']
+        headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
+        data = '{"node": "%s", "identifier": "%s","public_key": "%s"}' % (ip_node, identifier_node, public_key)
+        requests.post(url, data=data, json=data, headers=headers)
+
+    nodes.append(new_node)
 
     response = {
         'message': 'New nodes have been added',
