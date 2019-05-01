@@ -1,0 +1,21 @@
+version: '3.7'
+services:
+  ip_register_server:
+    image: blockchain
+    command: python ip_register_server.py
+    ports:
+      - 10000:5000
+    networks:
+      - backend
+  blockchian_server:
+    build: .
+    image: blockchain
+    command: python blockchain.py
+    ports:
+      - 10001-10003:5000 # (172.20.0.1:10000)
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: "bridge"

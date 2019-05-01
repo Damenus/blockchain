@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+ {% block head %}
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+ {% endblock %}
+</head>
+<body>
+    <h1>Id this server: {{ node_identifier }}</h1>
+    <h1>Money this server: {{ node_money }}</h1>
+
+    <ul>
+        <li><a href="/mine">Mine</a></li>
+        <li><a href="/">New Transaction</a></li>
+        <li><a href="/chain/template">Print all chain</a></li>
+        <li><a href="/nodes/resolve">Nodes resolve</a></li>
+    </ul>
+ {% block body %}{% endblock %}
+</body>
+</html>

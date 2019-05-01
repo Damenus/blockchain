@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+"ruamel.yaml" = "==0.15.37"
+logging-tree = "==1.7"
+colorlog = "==3.1.4"
+flask = "== 1.0.2"
+cryptography "==2.3.1"
+
+[dev-packages]
+flake8 = "==3.6.0"
+tox = "==3.5.2"
+pex = "==1.5.1"
+
+[requires]
+python_version = "3.6"
