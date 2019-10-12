@@ -202,9 +202,10 @@ class Blockchain:
 
             current_index += 1
 
-        for transaction in self.current_transactions:
-            if transaction['sender'] == node_identifier:
-                money -= int(transaction['amount'])
+        if self.current_transactions != '':
+            for transaction in self.current_transactions:
+                if transaction['sender'] == node_identifier:
+                    money -= int(transaction['amount'])
 
         return money
 
